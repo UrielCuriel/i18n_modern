@@ -4,9 +4,10 @@
   "description": "library for add dynamic localization for node an browsers",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "pretest": "npm run build",
-    "test": "mocha --allow-console-logs --recursive \"dist/__tests__\"",
+    "clean": "del-cli --force ./dist",
+    "build": "tsc --build",
+    "pretest": "npm run clean && npm run build",
+    "test": "mocha --allow-console-logs --exit --recursive \"dist/__tests__\"",
     "prepublish": "npm run build && npm run test",
     "publish": "npm publish"
   },
@@ -17,7 +18,9 @@
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
     "chai": "^4.3.4",
+    "del-cli": "^4.0.1",
     "mocha": "^9.0.2",
+    "rimraf": "^3.0.2",
     "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
   },
