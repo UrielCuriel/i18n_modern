@@ -33,6 +33,8 @@ describe("helpers", () => {
     expect(evalKey("name", values)).to.equal(true);
     expect(evalKey("[age] >= 25", values)).to.equal(true);
     expect(evalKey("[age] < 25", values)).to.equal(false);
+    expect(evalKey("[age] > 10 && [age] < 30", values)).to.equal(true);
+    expect(evalKey("[age] > 10 || [age] < 30", values)).to.equal(true);
   });
 
   it("mergeDeep", () => {
