@@ -1,7 +1,13 @@
 {
   "name": "i18n_modern",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "library for add dynamic localization for node an browsers",
+  "keywords": [
+    "i18n",
+    "translation",
+    "localization",
+    "internationalization"
+  ],
   "main": "index.js",
   "scripts": {
     "clean": "del-cli --force ./dist",
@@ -17,8 +23,11 @@
     "precommit": "pretty-quick --staged",
     "prepare": "husky install"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Uriel Curiel <urielcuriel@outlook.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UrielCuriel/i18n_modern.git"
+  },
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.2.21",
