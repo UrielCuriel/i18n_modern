@@ -117,7 +117,7 @@ export function isSafeString(str: string): boolean {
     "script",
   ];
   const regexValidExpression =
-    /^(?:\[?(\d+|\w+)\]?)+(?:(?:\s?)+(?:[\>\=\!\<]+)+(?:\s?)+(?:\[?(\d+|\w+)\]?))?$/g;
+    /^(?:\[?(\d+|\w+)\]?)(?:(?:(?:\s?)(?:[\>\=\!\<\|\&]?){2}(?:\s?)(?:\[?(\d+|\w+)\]?)(?:[\>\=\!\<\|\&]?){2})*)?$/g;
   return (
     regexValidExpression.test(str) &&
     reservedWords.every((word) => !str.includes(word))
