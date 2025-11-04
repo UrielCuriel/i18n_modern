@@ -521,9 +521,9 @@ export class Evaluator {
         if (name in this.context) {
           return this.context[name];
         }
-        // Return the identifier name itself if not found in context
-        // This allows checking if the identifier exists in values
-        return name;
+        // Return undefined if identifier not found in context to avoid ambiguity
+        // This makes missing variables explicit and prevents confusion with string literals
+        return undefined;
       }
 
       case NodeType.BINARY_OP: {
