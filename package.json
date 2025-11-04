@@ -9,6 +9,9 @@
     "clean": "rm -rf ./dist",
     "build": "tsc --declaration --emitDeclarationOnly --outDir ./dist && bun build ./src/index.ts --outdir ./dist --target browser",
     "test": "bun test",
+    "bench": "bun run src/bench/evaluator.bench.ts",
+    "bench:i18n": "bun run src/bench/i18n.bench.ts",
+    "bench:all": "bun run bench && bun run bench:i18n",
     "prepublish": "bun run build && bun test",
     "publish": "bun publish",
     "release": "bunx standard-version",
@@ -27,6 +30,7 @@
     "husky": "^7.0.1",
     "pretty-quick": "^3.1.1",
     "standard-version": "^9.3.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "mitata": "^1.0.34"
   }
 }
