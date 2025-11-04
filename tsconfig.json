@@ -47,6 +47,7 @@
     // "noPropertyAccessFromIndexSignature": true,  /* Require undeclared properties from index signatures to use element accesses. */
 
     /* Module Resolution Options */
+    // NOTE: "Bundler" module resolution requires TypeScript 5.0 or newer.
     "moduleResolution": "Bundler" /* Specify module resolution strategy: 'node' (Node.js), 'classic' (TypeScript pre-1.6), or 'Bundler' (for modern bundlers). */,
     // "baseUrl": "./",                             /* Base directory to resolve non-absolute module names. */
     // "paths": {},                                 /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */

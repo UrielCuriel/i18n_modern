@@ -132,10 +132,10 @@ the module have a `get` method that can be used to get a locale value, the metho
 `app.ts`
 
 ````typescript
-import { i18nModern } from "i18n_modern";
+import { I18nModern } from "i18n_modern";
 import en from "./locales/en";
 
-const i18n = new i18nModern(
+const i18n = new I18nModern(
   "en-US", // default locale id
   en // object to load locale
 );
@@ -167,7 +167,3 @@ The main class has been renamed from `i18nModern` to `I18nModern` to follow Type
 **Migration Required:** Update all imports and instantiations from `new i18nModern()` to `new I18nModern()`.
 
 See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed instructions and examples.
-
-````
-```
-````
