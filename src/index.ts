@@ -1,6 +1,6 @@
 /**
  * Module to get translation from a locales variable
- * @author: Uriel Curiel <urielcurrel@outlook.com>
+ * @author: Uriel Curiel <urielcuriel@outlook.com>
  */
 import { evalKey, formatValue, getDeepValue, mergeDeep } from "./helpers";
 import type { IFormatParam, ILocales } from "./types";
