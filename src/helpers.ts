@@ -1,3 +1,5 @@
+import { evaluateExpression } from "./evaluator";
+
 /**
  * function to get value from deep object
  * @param {object} obj - object to get value from
@@ -31,19 +33,20 @@ export function getDeepValue(obj: any, path: string): any {
  * @returns {boolean}
  */
 export function evalKey(key: string, values?: object): boolean {
-  if (!isSafeString(key)) {
-    console.error("evalKey: key is not a safe string");
-    return false;
-  }
   const logicalOperatorsJsList = ["==", "!=", ">", "<", ">=", "<="];
-  key = formatValue(key, values);
+  const formattedKey = formatValue(key, values);
+
   //check if key include an operator
-  if (logicalOperatorsJsList.some((logical) => key.includes(logical))) {
-    return eval(key);
+  if (
+    logicalOperatorsJsList.some((logical) => formattedKey.includes(logical))
+  ) {
+    // Use the custom evaluator instead of eval
+    return evaluateExpression(formattedKey, values || {});
   } else {
     if (values)
       return (
-        Object.keys(values).includes(key) || Object.values(values).includes(key)
+        Object.keys(values).includes(formattedKey) ||
+        Object.values(values).includes(formattedKey)
       );
     return false;
   }
