@@ -51,6 +51,7 @@ describe("i18nModern", () => {
     expect(i18n.get("profile.vote", { locale: "es-MX", values })).toBe(
       "Eres lo suficientemente viejo para votar"
     );
+    // Expecting fallback to English message since Spanish translation for age 12 is missing
     expect(
       i18n.get("profile.vote", {
         locale: "es-MX",

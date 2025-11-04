@@ -60,6 +60,7 @@ const close = () => {
     return Promise.resolve();
   }
 
+  // The 'true' flag forces the server to close all connections immediately.
   server.stop(true);
   server = null;
 

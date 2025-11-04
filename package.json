@@ -7,7 +7,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "clean": "rm -rf ./dist",
-    "build": "bun build ./src/index.ts --outdir ./dist --target browser",
+    "build": "tsc --declaration --emitDeclarationOnly --outDir ./dist && bun build ./src/index.ts --outdir ./dist --target browser",
     "test": "bun test",
     "prepublish": "bun run build && bun test",
     "publish": "bun publish",
