@@ -13,6 +13,20 @@ export class I18nModern {
   #locales: ILocales = {};
   #defaultLocale: string;
   #previousTranslations = new Map<string, string>();
+  static readonly MAX_CACHE_SIZE = 500;
+
+  private setCache(key: string, value: string) {
+    if (this.#previousTranslations.has(key)) {
+      this.#previousTranslations.delete(key);
+    } else if (this.#previousTranslations.size >= I18nModern.MAX_CACHE_SIZE) {
+      // Remove the oldest entry (first inserted)
+      const oldestKey = this.#previousTranslations.keys().next().value;
+      if (oldestKey) {
+        this.#previousTranslations.delete(oldestKey);
+      }
+    }
+    this.#previousTranslations.set(key, value);
+  }
   ready: Promise<void> = Promise.resolve();
 
   constructor(defaultLocale: string, locales?: ILocales | string) {
@@ -76,7 +90,10 @@ export class I18nModern {
    * @param params:IFormatParam
    * @returns {string}
    */
-  get(key: string, params: { locale?: string; values?: IFormatParam } = {}) {
+  get(
+    key: string,
+    params: { locale?: string; values?: IFormatParam } = {}
+  ): string {
     const { locale = this.#defaultLocale, values } = params;
     const previous = JSON.stringify({ key, locale, values });
     const cached = this.#previousTranslations.get(previous);
@@ -88,19 +105,19 @@ export class I18nModern {
       this.#locales[locale] ?? this.#locales[this.#defaultLocale];
     if (!localeData) {
       console.error(`the locale ${locale} is not defined in locales`);
-      return undefined;
+      return "";
     }
 
     const translation = getDeepValue(localeData, key);
     const resolved = this.getTranslation(translation, values);
 
     if (typeof resolved === "string") {
-      this.#previousTranslations.set(previous, resolved);
+      this.setCache(previous, resolved);
+      return resolved;
     } else {
       console.error(`the key ${key} is not defined in locales`);
+      return "";
     }
-
-    return resolved;
   }
 
   /**
