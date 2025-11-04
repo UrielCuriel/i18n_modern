@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import { i18nModern } from "../..";
+import { i18nModern } from "../../index";
 import { startServer, stopServer } from "../fixtures/es_server";
 import { en } from "../fixtures/en";
 
