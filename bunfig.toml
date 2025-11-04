@@ -1,0 +1,15 @@
+[install]
+production = false
+optional = true
+peer = true
+saveTextLockfile = true
+
+[test]
+root = "src/__tests__"
+
+[build]
+root = "src"
+outdir = "dist"
+minify = true
+target = "browser"
+format = "esm"
