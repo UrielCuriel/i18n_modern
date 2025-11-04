@@ -304,8 +304,10 @@ export class Tokenizer {
         continue;
       }
 
-      // Unknown character - skip it
-      this.advance();
+      // Unknown character - throw error
+      throw new Error(
+        `Unknown character '${this.current}' at position ${this.position} in expression`
+      );
     }
 
     tokens.push({ type: TokenType.EOF, value: "", position: this.position });
