@@ -96,8 +96,10 @@ export class I18nModern {
     params: { locale?: string; values?: IFormatParam } = {}
   ): string {
     const { locale = this.#defaultLocale, values } = params;
-    const previous = JSON.stringify({ key, locale, values });
-    const cached = this.#previousTranslations.get(previous);
+    // Create a deterministic cache key to avoid issues with JSON.stringify
+    // property ordering and to handle edge cases like functions or circular references
+    const cacheKey = `${key}:${locale}:${values ? JSON.stringify(values) : ""}`;
+    const cached = this.#previousTranslations.get(cacheKey);
     if (cached) {
       return cached;
     }
@@ -113,7 +115,7 @@ export class I18nModern {
     const resolved = this.getTranslation(translation, values);
 
     if (typeof resolved === "string") {
-      this.setCache(previous, resolved);
+      this.setCache(cacheKey, resolved);
       return resolved;
     } else {
       console.error(`the key ${key} is not defined in locales`);
