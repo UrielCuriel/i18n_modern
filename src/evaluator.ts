@@ -480,25 +480,27 @@ export class Evaluator {
 
   /**
    * Compare two values with type coercion
+   * Uses JavaScript's built-in type coercion (== and !=) to match the original eval() behavior.
+   * This allows expressions like [age] == "25" to work when age is the number 25.
    */
   private compare(left: any, right: any, operator: TokenType): boolean {
-    // Convert to comparable types
-    const leftVal = left;
-    const rightVal = right;
-
     switch (operator) {
       case TokenType.EQUAL:
-        return leftVal == rightVal; // intentional == for type coercion
+        // Intentional use of == for type coercion to match original eval() behavior
+        // eslint-disable-next-line eqeqeq
+        return left == right;
       case TokenType.NOT_EQUAL:
-        return leftVal != rightVal; // intentional != for type coercion
+        // Intentional use of != for type coercion to match original eval() behavior
+        // eslint-disable-next-line eqeqeq
+        return left != right;
       case TokenType.GREATER:
-        return leftVal > rightVal;
+        return left > right;
       case TokenType.GREATER_EQUAL:
-        return leftVal >= rightVal;
+        return left >= right;
       case TokenType.LESS:
-        return leftVal < rightVal;
+        return left < right;
       case TokenType.LESS_EQUAL:
-        return leftVal <= rightVal;
+        return left <= right;
       default:
         throw new Error(`Unknown comparison operator: ${operator}`);
     }
