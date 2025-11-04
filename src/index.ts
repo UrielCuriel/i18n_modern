@@ -1,53 +1,76 @@
 /**
  * Module to get translation from a locales variable
- * @author: Uriel Curiel <urielcurrel@outlook.com>
+ * @author: Uriel Curiel <urielcuriel@outlook.com>
  */
-import axios from "axios";
 import { evalKey, formatValue, getDeepValue, mergeDeep } from "./helpers";
-import { ILocales, IFormatParam } from "./types";
+import type { IFormatParam, ILocales } from "./types";
 /**
  * @description: Gets the translation from a locales variable
  * @param {string} defaultLocale - The default locale
  * @param {ILocales} locales - The locales variable
  */
-export class i18nModern {
-  private _locales: ILocales = {};
-  private _defaultLocale!: string;
-  private previousTranslations: any = {};
-  ready!: Promise<void>;
-  constructor(defaultLocale: string, locales?: ILocales | string) {
-    this._defaultLocale = defaultLocale;
-    if (locales) {
-      if (typeof locales === "string") {
-        this.loadFromUrl(locales, defaultLocale);
-      } else {
-        this.loadFromValue(locales, defaultLocale);
+export class I18nModern {
+  #locales: ILocales = {};
+  #defaultLocale: string;
+  #previousTranslations = new Map<string, string>();
+  static readonly MAX_CACHE_SIZE = 500;
+
+  private setCache(key: string, value: string) {
+    if (this.#previousTranslations.has(key)) {
+      this.#previousTranslations.delete(key);
+    }
+    if (this.#previousTranslations.size >= I18nModern.MAX_CACHE_SIZE) {
+      // Remove the oldest entry (first inserted)
+      const oldestKey = this.#previousTranslations.keys().next().value;
+      if (oldestKey) {
+        this.#previousTranslations.delete(oldestKey);
       }
+    }
+    this.#previousTranslations.set(key, value);
+  }
+  ready: Promise<void> = Promise.resolve();
+
+  constructor(defaultLocale: string, locales?: ILocales | string) {
+    this.#defaultLocale = defaultLocale;
+    if (typeof locales === "string") {
+      this.ready = this.loadFromUrl(locales, defaultLocale);
+    } else if (locales) {
+      this.loadFromValue(locales, defaultLocale);
     }
   }
 
   // default locale getter
   get defaultLocale(): string {
-    return this._defaultLocale;
+    return this.#defaultLocale;
   }
 
   // default locale setter
   set defaultLocale(value: string) {
-    this._defaultLocale = value;
+    this.#defaultLocale = value;
   }
 
   /**
-   * function to load a locales from url using axios
+   * function to load a locales from url using fetch
    * @param localesUrl: string
    * @param localeIdentify: string
    */
-  loadFromUrl(localesUrl: string, localeIdentify: string) {
-    this.ready = axios.get(localesUrl).then((response) => {
-      this._locales[localeIdentify] = mergeDeep(
-        this._locales[this._defaultLocale],
-        response.data
+  loadFromUrl(localesUrl: string, localeIdentify: string): Promise<void> {
+    const readyPromise = (async () => {
+      const response = await globalThis.fetch(localesUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load locales from ${localesUrl}: ${response.status} ${response.statusText}`
+        );
+      }
+      const data = (await response.json()) as ILocales;
+      this.#locales[localeIdentify] = mergeDeep(
+        this.#locales[this.#defaultLocale] ?? {},
+        data
       );
-    });
+    })();
+
+    this.ready = readyPromise;
+    return readyPromise;
   }
   /**
    * function to load a locales from a value
@@ -55,10 +78,11 @@ export class i18nModern {
    * @param localeIdentify: string
    */
   loadFromValue(locales: ILocales, localeIdentify: string) {
-    this._locales[localeIdentify] = mergeDeep(
-      this._locales[this._defaultLocale],
+    this.#locales[localeIdentify] = mergeDeep(
+      this.#locales[this.#defaultLocale] ?? {},
       locales
     );
+    this.ready = Promise.resolve();
   }
 
   /**
@@ -67,22 +91,35 @@ export class i18nModern {
    * @param params:IFormatParam
    * @returns {string}
    */
-  get(key: string, params: { locale?: string; values?: IFormatParam }) {
-    try {
-      params.locale = params.locale ?? this._defaultLocale;
-      const previous = JSON.stringify({ key, params });
-      if (this.previousTranslations && this.previousTranslations[previous]) {
-        return this.previousTranslations[previous];
-      } else {
-        const translation = getDeepValue(this._locales[params.locale], key);
-        this.previousTranslations[previous] = this.getTranslation(
-          translation,
-          params.values
-        );
-        return this.previousTranslations[previous];
-      }
-    } catch (error) {
+  get(
+    key: string,
+    params: { locale?: string; values?: IFormatParam } = {}
+  ): string {
+    const { locale = this.#defaultLocale, values } = params;
+    // Create a deterministic cache key to avoid issues with JSON.stringify
+    // property ordering and to handle edge cases like functions or circular references
+    const cacheKey = `${key}:${locale}:${values ? JSON.stringify(values) : ""}`;
+    const cached = this.#previousTranslations.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const localeData =
+      this.#locales[locale] ?? this.#locales[this.#defaultLocale];
+    if (!localeData) {
+      console.error(`the locale ${locale} is not defined in locales`);
+      return "";
+    }
+
+    const translation = getDeepValue(localeData, key);
+    const resolved = this.getTranslation(translation, values);
+
+    if (typeof resolved === "string") {
+      this.setCache(cacheKey, resolved);
+      return resolved;
+    } else {
       console.error(`the key ${key} is not defined in locales`);
+      return "";
     }
   }
 
@@ -96,23 +133,30 @@ export class i18nModern {
     translation: any,
     values?: IFormatParam,
     defaultTranslation?: string
-  ): string {
-    if (translation["default"]) defaultTranslation = translation["default"];
-    if (typeof translation !== "string") {
-      const key = Object.keys(translation).find((key) => evalKey(key, values));
-
-      if (key)
-        return this.getTranslation(
-          translation[key],
-          values,
-          defaultTranslation
-        );
-      return this.getTranslation(
-        defaultTranslation,
-        values,
-        defaultTranslation
-      );
+  ): string | undefined {
+    if (typeof translation === "string") {
+      return formatValue(translation, values);
     }
-    return formatValue(translation, values);
+
+    const fallback =
+      typeof translation?.default === "string"
+        ? translation.default
+        : defaultTranslation;
+
+    if (translation && typeof translation === "object") {
+      const key = Object.keys(translation).find(
+        (candidate) => candidate !== "default" && evalKey(candidate, values)
+      );
+
+      if (key) {
+        return this.getTranslation(translation[key], values, fallback);
+      }
+    }
+
+    if (typeof fallback === "string") {
+      return this.getTranslation(fallback, values, fallback);
+    }
+
+    return undefined;
   }
 }

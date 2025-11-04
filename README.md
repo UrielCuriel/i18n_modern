@@ -16,6 +16,8 @@ Module to use localization in your project both backend with node js and fronten
 
 2.4 [Get a locale value](#get_locale_value)
 
+3 [Breaking Changes](#breaking-changes)
+
 ## Development
 
 This project now uses the [Bun](https://bun.sh/) toolchain for local development. To get started:
@@ -43,9 +45,9 @@ the module can have several languages, to load it you can use any of the followi
 loading locale from url
 
 ```typescript
-import { i18nModern } from "i18n_modern";
+import { I18nModern } from "i18n_modern";
 
-const i18n = new i18nModern(
+const i18n = new I18nModern(
   "en-US", // default locale id
   "localhost:3000/en.json" // url to load the json locale
 );
@@ -54,10 +56,10 @@ const i18n = new i18nModern(
 loading locale from object
 
 ```typescript
-import { i18nModern } from "i18n_modern";
+import { I18nModern } from "i18n_modern";
 import en from "./locales/en";
 
-const i18n = new i18nModern(
+const i18n = new I18nModern(
   "en-US", // default locale id
   en // object to load locale
 );
@@ -130,10 +132,10 @@ the module have a `get` method that can be used to get a locale value, the metho
 `app.ts`
 
 ```typescript
-import { i18nModern } from "i18n_modern";
+import { I18nModern } from "i18n_modern";
 import en from "./locales/en";
 
-const i18n = new i18nModern(
+const i18n = new I18nModern(
   "en-US", // default locale id
   en // object to load locale
 );
@@ -146,3 +148,13 @@ const notificationsCount = i18n.get("notificationsCount", {
 });
 // notificationsCount: You have many notifications
 ```
+
+## Breaking Changes <a id="breaking-changes"></a>
+
+### Version 2.0.0
+
+The main class has been renamed from `i18nModern` to `I18nModern` to follow TypeScript/JavaScript PascalCase convention for classes.
+
+**Migration Required:** Update all imports and instantiations from `new i18nModern()` to `new I18nModern()`.
+
+See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed instructions and examples.

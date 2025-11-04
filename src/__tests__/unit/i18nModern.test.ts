@@ -1,10 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import { i18nModern } from "../../index";
+import { I18nModern } from "../../index";
 import { startServer, stopServer } from "../fixtures/es_server";
 import { en } from "../fixtures/en";
 
-describe("i18nModern", () => {
-  let i18n: i18nModern;
+describe("I18nModern", () => {
   const values = { name: "Uriel", age: 25 };
 
   beforeAll(async () => {
@@ -16,12 +15,13 @@ describe("i18nModern", () => {
   });
 
   it("i18n constructor", () => {
-    i18n = new i18nModern("en-US");
+    const i18n = new I18nModern("en-US");
     expect(i18n).toBeDefined();
     expect(i18n.defaultLocale).toBe("en-US");
   });
 
   it("i18n loadFromValue", () => {
+    const i18n = new I18nModern("en-US");
     i18n.loadFromValue(en, "en-US");
     expect(i18n.get("home.greetings", { values })).toBe("Hello Uriel");
     expect(i18n.get("profile.greetings", { values })).toBe("Hello Uriel");
@@ -34,6 +34,8 @@ describe("i18nModern", () => {
   });
 
   it("i18n loadFromUrl", async () => {
+    const i18n = new I18nModern("en-US");
+    i18n.loadFromValue(en, "en-US");
     i18n.loadFromUrl("http://localhost:3710/es.json", "es-MX");
     await i18n.ready;
     expect(i18n.get("home.greetings", { locale: "es-MX", values })).toBe(
