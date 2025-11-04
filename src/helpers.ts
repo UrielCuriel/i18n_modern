@@ -41,6 +41,9 @@ export function evalKey(key: string, values?: object): boolean {
     logicalOperatorsJsList.some((logical) => formattedKey.includes(logical))
   ) {
     // Use the custom evaluator instead of eval
+    if (!isSafeString(formattedKey)) {
+      return false;
+    }
     return evaluateExpression(formattedKey, values || {});
   } else {
     if (values)
