@@ -18,7 +18,8 @@ export class I18nModern {
   private setCache(key: string, value: string) {
     if (this.#previousTranslations.has(key)) {
       this.#previousTranslations.delete(key);
-    } else if (this.#previousTranslations.size >= I18nModern.MAX_CACHE_SIZE) {
+    }
+    if (this.#previousTranslations.size >= I18nModern.MAX_CACHE_SIZE) {
       // Remove the oldest entry (first inserted)
       const oldestKey = this.#previousTranslations.keys().next().value;
       if (oldestKey) {
