@@ -131,15 +131,6 @@ the module have a `get` method that can be used to get a locale value, the metho
 
 `app.ts`
 
-````typescript
-import { I18nModern } from "i18n_modern";
-import en from "./locales/en";
-
-const i18n = new I18nModern(
-  "en-US", // default locale id
-  en // object to load locale
-);
-
 ```typescript
 import { I18nModern } from "i18n_modern";
 import en from "./locales/en";
@@ -156,7 +147,7 @@ const notificationsCount = i18n.get("notificationsCount", {
   },
 });
 // notificationsCount: You have many notifications
-````
+```
 
 ## Breaking Changes <a id="breaking-changes"></a>
 
