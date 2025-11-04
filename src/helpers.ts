@@ -5,8 +5,11 @@
  * @returns {any}
  */
 export function getDeepValue(obj: any, path: string): any {
-  if (path.indexOf(".") === -1) {
-    return obj[path];
+  if (obj == null) {
+    return undefined;
+  }
+  if (!path.includes(".")) {
+    return obj?.[path];
   }
   const keys = path.split(".");
   let value = obj;
@@ -52,7 +55,10 @@ export function evalKey(key: string, values?: object): boolean {
  * @param {object} value - value to replace
  * @returns {string}
  */
-export function formatValue(str: string, value: any): string {
+export function formatValue(str: string, value?: Record<string, any>): string {
+  if (!value || typeof value !== "object") {
+    return str;
+  }
   return str.replace(/\[(.*?)\]/g, (a, b) => {
     return Object.prototype.hasOwnProperty.call(value, b) &&
       value[b] !== null &&
