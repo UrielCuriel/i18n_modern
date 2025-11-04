@@ -238,6 +238,12 @@ export class Tokenizer {
         this.advance();
         continue;
       }
+      // Check for single ! (NOT operator) which is not supported
+      if (this.current === "!" && this.peek() !== "=") {
+        throw new Error(
+          `Negation operator '!' is not supported at position ${this.position}. All evaluations must be explicit Boolean comparison expressions.`
+        );
+      }
       if (this.current === "!" && this.peek() === "=") {
         tokens.push({
           type: TokenType.NOT_EQUAL,

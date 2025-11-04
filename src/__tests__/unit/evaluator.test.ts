@@ -228,8 +228,8 @@ describe("evaluateExpression", () => {
 
   it("should handle string comparisons", () => {
     const values = { name: "Uriel" };
-    expect(evaluateExpression("[name] == Uriel", values)).toBe(true);
     expect(evaluateExpression('[name] == "Uriel"', values)).toBe(true);
+    expect(evaluateExpression('[name] != "John"', values)).toBe(true);
   });
 
   it("should handle type coercion", () => {
@@ -240,6 +240,16 @@ describe("evaluateExpression", () => {
 
   it("should handle missing variables", () => {
     expect(evaluateExpression("[unknown] >= 18", {})).toBe(false);
+  });
+
+  it("should avoid ambiguity with missing variables", () => {
+    // Missing variable should not match string literal with same name
+    expect(evaluateExpression('[missing] == "missing"', {})).toBe(false);
+    // This verifies the fix for: undefined != "missing"
+  });
+
+  it("should reject single ! (NOT) operator", () => {
+    expect(evaluateExpression("![active]", { active: true })).toBe(false);
   });
 
   it("should handle invalid expressions gracefully", () => {
