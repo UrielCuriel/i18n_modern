@@ -93,6 +93,9 @@ export interface LogicalOpNode extends ASTNode {
   right: ASTNode;
 }
 
+const AST_CACHE_MAX_SIZE = 128;
+const astCache: Map<string, ASTNode> = new Map();
+
 /**
  * Tokenizer class - converts expression string into tokens
  */
@@ -468,6 +471,40 @@ export class Parser {
   }
 }
 
+function getAstFromCache(expression: string): ASTNode | undefined {
+  const cached = astCache.get(expression);
+  if (!cached) return undefined;
+  astCache.delete(expression);
+  astCache.set(expression, cached);
+  return cached;
+}
+
+function storeAstInCache(expression: string, ast: ASTNode): void {
+  if (AST_CACHE_MAX_SIZE <= 0) return;
+  if (astCache.size >= AST_CACHE_MAX_SIZE) {
+    const oldestEntry = astCache.keys().next().value;
+    if (oldestEntry !== undefined) {
+      astCache.delete(oldestEntry);
+    }
+  }
+  astCache.set(expression, ast);
+}
+
+function buildAst(expression: string): ASTNode {
+  const tokenizer = new Tokenizer(expression);
+  const tokens = tokenizer.tokenize();
+  const parser = new Parser(tokens);
+  return parser.parse();
+}
+
+function getOrCreateAst(expression: string): ASTNode {
+  const cached = getAstFromCache(expression);
+  if (cached) return cached;
+  const ast = buildAst(expression);
+  storeAstInCache(expression, ast);
+  return ast;
+}
+
 /**
  * Evaluator class - executes the AST with provided context
  */
@@ -553,6 +590,10 @@ export class Evaluator {
   }
 }
 
+export function clearExpressionCache(): void {
+  astCache.clear();
+}
+
 /**
  * Main function to evaluate an expression string with context
  * @param expression - The expression string to evaluate
@@ -564,10 +605,8 @@ export function evaluateExpression(
   context: Record<string, any> = {}
 ): any {
   try {
-    const tokenizer = new Tokenizer(expression);
-    const tokens = tokenizer.tokenize();
-    const parser = new Parser(tokens);
-    const ast = parser.parse();
+    const normalizedExpression = expression.trim();
+    const ast = getOrCreateAst(normalizedExpression);
     const evaluator = new Evaluator(context);
     return evaluator.evaluate(ast);
   } catch (error) {
