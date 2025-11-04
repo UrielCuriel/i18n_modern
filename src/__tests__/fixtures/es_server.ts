@@ -1,46 +1,72 @@
 /**
- * basic node server to return en.json
+ * basic bun server to return en.json
  */
-import { createServer, IncomingMessage, ServerResponse } from "http";
-import { createReadStream } from "fs";
-var server = createServer(function (req: IncomingMessage, res: ServerResponse) {
-  if (req.url === "/es.json") {
-    res.writeHead(200, {
-      "Content-Type": "application/json; charset=utf-8",
-    });
-    const data = {
-      home: {
-        greetings: "Hola [name]",
-        title: "Bienvenido a mi sitio web",
-      },
-      profile: {
-        greetings: {
-          default: "Hola [name]",
-          gender: {
-            male: {
-              "[age] >= 18": "Hola Sr [name]",
-            },
-            female: {
-              "[age] >= 18": "Hola Sra [name]",
-              "[age] < 18": "Hola Srta [name]",
-            },
-            noBinary: {
-              "[age] >= 18": "Hola Sre [name]",
-            },
-          },
+const data = {
+  home: {
+    greetings: "Hola [name]",
+    title: "Bienvenido a mi sitio web",
+  },
+  profile: {
+    greetings: {
+      default: "Hola [name]",
+      gender: {
+        male: {
+          "[age] >= 18": "Hola Sr [name]",
         },
-        vote: {
-          "[age] >= 18": "Eres lo suficientemente viejo para votar",
+        female: {
+          "[age] >= 18": "Hola Sra [name]",
+          "[age] < 18": "Hola Srta [name]",
+        },
+        noBinary: {
+          "[age] >= 18": "Hola Sre [name]",
         },
       },
-    };
-    res.end(JSON.stringify(data));
-  } else {
-    res.writeHead(404);
-    res.end("not found");
+    },
+    vote: {
+      "[age] >= 18": "Eres lo suficientemente viejo para votar",
+    },
+  },
+};
+
+let server: ReturnType<typeof Bun.serve> | null = null;
+
+const listen = () => {
+  if (server) {
+    return Promise.resolve();
   }
-});
 
-server.listen(3710);
+  server = Bun.serve({
+    port: 3710,
+    fetch(request) {
+      const { pathname } = new URL(request.url);
 
-module.exports = server;
+      if (pathname === "/es.json") {
+        return new Response(JSON.stringify(data), {
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+          },
+        });
+      }
+
+      return new Response("not found", { status: 404 });
+    },
+  });
+
+  return Promise.resolve();
+};
+
+const close = () => {
+  if (!server) {
+    return Promise.resolve();
+  }
+
+  // The 'true' flag forces the server to close all connections immediately.
+  server.stop(true);
+  server = null;
+
+  return Promise.resolve();
+};
+
+export const startServer = listen;
+export const stopServer = close;
+export { server };

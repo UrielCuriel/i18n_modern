@@ -16,6 +16,18 @@ Module to use localization in your project both backend with node js and fronten
 
 2.4 [Get a locale value](#get_locale_value)
 
+## Development
+
+This project now uses the [Bun](https://bun.sh/) toolchain for local development. To get started:
+
+```bash
+bun install
+bun run build
+bun test
+```
+
+These commands install dependencies, compile the TypeScript sources, and execute the automated test suite respectively.
+
 ## how to install <a id="introduction"></a>
 
 ```console
