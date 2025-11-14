@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/UrielCuriel/i18n_modern/compare/v2.0.3...v2.1.0) (2025-11-14)
+
+### Features
+
+- **readme:** add framework integration section and new configuration-based API examples ([cb31c64](https://github.com/UrielCuriel/i18n_modern/commit/cb31c64d3dc6010a63baec3fbddbe3193cb4c116))
+- **version:** add static method to retrieve build version ([b666efd](https://github.com/UrielCuriel/i18n_modern/commit/b666efda111d3a7b50f79852f0247372e449b1d4))
+
 ### [2.0.3](https://github.com/UrielCuriel/i18n_modern/compare/v2.0.2...v2.0.3) (2025-11-14)
 
 ### [2.0.2](https://github.com/UrielCuriel/i18n_modern/compare/v2.0.1...v2.0.2) (2025-11-14)
