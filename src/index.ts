@@ -3,15 +3,28 @@ declare const BUILD_VERSION: string;
  * Module to get translation from a locales variable
  * @author: Uriel Curiel <urielcuriel@outlook.com>
  */
-import { evalKey, formatValue, getDeepValue, mergeDeep } from "./helpers";
-import type { IFormatParam, ILocales } from "./types";
+import {
+  evalKey,
+  formatValue,
+  getDeepValue,
+  isDevelopmentMode,
+  mergeDeep,
+} from "./helpers";
+import type {
+  IFormatParam,
+  ILocales,
+  I18nModernConfig,
+  ILocalesAccessor,
+} from "./types";
 /**
  * @description: Gets the translation from a locales variable
  * @param {string} defaultLocale - The default locale
  * @param {ILocales} locales - The locales variable
  */
 export class I18nModern {
-  #locales: ILocales = {};
+  #internalLocales: ILocales = {};
+  #localesGetter: () => ILocales;
+  #localesSetter: (value: ILocales) => void;
   #defaultLocale: string;
   #previousTranslations = new Map<string, string>();
   static readonly MAX_CACHE_SIZE = 500;
@@ -31,12 +44,52 @@ export class I18nModern {
   }
   ready: Promise<void> = Promise.resolve();
 
-  constructor(defaultLocale: string, locales?: ILocales | string) {
-    this.#defaultLocale = defaultLocale;
-    if (typeof locales === "string") {
-      this.ready = this.loadFromUrl(locales, defaultLocale);
-    } else if (locales) {
-      this.loadFromValue(locales, defaultLocale);
+  constructor(
+    defaultLocale: string | I18nModernConfig,
+    locales?: ILocales | string
+  ) {
+    // Support both old API and new config-based API
+    if (typeof defaultLocale === "string") {
+      // Old API: new I18nModern(defaultLocale, locales)
+      this.#defaultLocale = defaultLocale;
+      this.#localesGetter = () => this.#internalLocales;
+      this.#localesSetter = (value: ILocales) => {
+        this.#internalLocales = value;
+      };
+
+      if (typeof locales === "string") {
+        this.ready = this.loadFromUrl(locales, defaultLocale);
+      } else if (locales) {
+        this.loadFromValue(locales, defaultLocale);
+      }
+    } else {
+      // New API: new I18nModern({ defaultLocale, locales })
+      const config = defaultLocale as I18nModernConfig;
+      this.#defaultLocale = config.defaultLocale;
+
+      // Check if locales is provided with custom getter/setter
+      if (
+        config.locales &&
+        typeof config.locales === "object" &&
+        "get" in config.locales &&
+        "set" in config.locales
+      ) {
+        const accessor = config.locales as ILocalesAccessor;
+        this.#localesGetter = accessor.get;
+        this.#localesSetter = accessor.set;
+      } else {
+        // Use internal storage
+        this.#localesGetter = () => this.#internalLocales;
+        this.#localesSetter = (value: ILocales) => {
+          this.#internalLocales = value;
+        };
+
+        if (typeof config.locales === "string") {
+          this.ready = this.loadFromUrl(config.locales, config.defaultLocale);
+        } else if (config.locales) {
+          this.loadFromValue(config.locales as ILocales, config.defaultLocale);
+        }
+      }
     }
   }
 
@@ -69,10 +122,15 @@ export class I18nModern {
         );
       }
       const data = (await response.json()) as ILocales;
-      this.#locales[localeIdentify] = mergeDeep(
-        this.#locales[this.#defaultLocale] ?? {},
-        data
-      );
+      const currentLocales = this.#localesGetter();
+      const updatedLocales = {
+        ...currentLocales,
+        [localeIdentify]: mergeDeep(
+          currentLocales[this.#defaultLocale] ?? {},
+          data
+        ),
+      };
+      this.#localesSetter(updatedLocales);
     })();
 
     this.ready = readyPromise;
@@ -84,10 +142,15 @@ export class I18nModern {
    * @param localeIdentify: string
    */
   loadFromValue(locales: ILocales, localeIdentify: string) {
-    this.#locales[localeIdentify] = mergeDeep(
-      this.#locales[this.#defaultLocale] ?? {},
-      locales
-    );
+    const currentLocales = this.#localesGetter();
+    const updatedLocales = {
+      ...currentLocales,
+      [localeIdentify]: mergeDeep(
+        currentLocales[this.#defaultLocale] ?? {},
+        locales
+      ),
+    };
+    this.#localesSetter(updatedLocales);
     this.ready = Promise.resolve();
   }
 
@@ -110,10 +173,13 @@ export class I18nModern {
       return cached;
     }
 
+    const currentLocales = this.#localesGetter();
     const localeData =
-      this.#locales[locale] ?? this.#locales[this.#defaultLocale];
+      currentLocales[locale] ?? currentLocales[this.#defaultLocale];
     if (!localeData) {
-      console.error(`the locale ${locale} is not defined in locales`);
+      if (isDevelopmentMode()) {
+        console.error(`the locale ${locale} is not defined in locales`);
+      }
       return "";
     }
 
@@ -132,7 +198,11 @@ export class I18nModern {
       this.setCache(cacheKey, resolved);
       return resolved;
     } else {
-      console.error(`the key ${key} is not defined in locales`);
+      if (isDevelopmentMode()) {
+        console.warn(
+          `the key ${key} is not defined in locales, this warning is shown only in development mode`
+        );
+      }
       return "";
     }
   }

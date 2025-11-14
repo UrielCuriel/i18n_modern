@@ -16,6 +16,8 @@ Module to use localization in your project both backend with node js and fronten
 
 2.4 [Get a locale value](#get_locale_value)
 
+2.5 [Framework Integration (Vue, Svelte, etc.)](#framework-integration)
+
 3 [Breaking Changes](#breaking-changes)
 
 ## Development
@@ -41,6 +43,26 @@ npm install i18n_modern
 the module can have several languages, to load it you can use any of the following methods
 
 ### module instance <a id="instance"></a>
+
+**New Configuration-based API** (Recommended)
+
+```typescript
+import { I18nModern } from "i18n_modern";
+
+// Loading locale from object
+const i18n = new I18nModern({
+  defaultLocale: "en-US",
+  locales: en, // object to load locale
+});
+
+// Loading locale from URL
+const i18n = new I18nModern({
+  defaultLocale: "en-US",
+  locales: "localhost:3000/en.json", // url to load the json locale
+});
+```
+
+**Legacy API** (Still supported for backward compatibility)
 
 loading locale from url
 
@@ -147,6 +169,107 @@ const notificationsCount = i18n.get("notificationsCount", {
   },
 });
 // notificationsCount: You have many notifications
+```
+
+### Framework Integration (Vue, Svelte, etc.) <a id="framework-integration"></a>
+
+`i18n_modern` is framework-agnostic and can integrate with reactive systems from Vue, Svelte, Solid.js, and other frameworks by providing custom getter/setter functions for the locales storage.
+
+#### Vue 3 Integration (Composition API)
+
+```typescript
+import { ref } from "vue";
+import { I18nModern } from "i18n_modern";
+import type { ILocales } from "i18n_modern";
+
+// Create a reactive ref for locales
+const locales = ref<ILocales>({});
+
+// Initialize i18n with custom getter/setter
+const i18n = new I18nModern({
+  defaultLocale: "en-US",
+  locales: {
+    get: () => locales.value,
+    set: (newLocales) => {
+      locales.value = newLocales;
+    },
+  },
+});
+
+// Load locales - this will update the reactive ref
+i18n.loadFromValue(en, "en-US");
+
+// Now locales.value is reactive and any changes will trigger Vue's reactivity
+```
+
+#### Svelte Integration
+
+```typescript
+import { writable } from "svelte/store";
+import { I18nModern } from "i18n_modern";
+import type { ILocales } from "i18n_modern";
+
+// Create a writable store for locales
+const locales = writable<ILocales>({});
+
+// Initialize i18n with custom getter/setter
+const i18n = new I18nModern({
+  defaultLocale: "en-US",
+  locales: {
+    get: () => {
+      let value: ILocales = {};
+      locales.subscribe((v) => (value = v))();
+      return value;
+    },
+    set: (newLocales) => {
+      locales.set(newLocales);
+    },
+  },
+});
+
+// Load locales - this will update the store
+i18n.loadFromValue(en, "en-US");
+```
+
+#### Solid.js Integration
+
+```typescript
+import { createSignal } from "solid-js";
+import { I18nModern } from "i18n_modern";
+import type { ILocales } from "i18n_modern";
+
+// Create a signal for locales
+const [locales, setLocales] = createSignal<ILocales>({});
+
+// Initialize i18n with custom getter/setter
+const i18n = new I18nModern({
+  defaultLocale: "en-US",
+  locales: {
+    get: () => locales(),
+    set: (newLocales) => {
+      setLocales(newLocales);
+    },
+  },
+});
+
+// Load locales - this will update the signal
+i18n.loadFromValue(en, "en-US");
+```
+
+#### Plain JavaScript (No Framework)
+
+For applications that don't use a reactive framework, you can simply pass a plain object:
+
+```typescript
+import { I18nModern } from "i18n_modern";
+
+const i18n = new I18nModern({
+  defaultLocale: "en-US",
+  locales: {}, // Plain object
+});
+
+// Or use the legacy API
+const i18n = new I18nModern("en-US", en);
 ```
 
 ## Breaking Changes <a id="breaking-changes"></a>

@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { I18nModern } from "../../index";
 import { startServer, stopServer } from "../fixtures/es_server";
 import { en } from "../fixtures/en";
+import type { ILocales } from "../../types";
 
 describe("I18nModern", () => {
   const values = { name: "Uriel", age: 25 };
@@ -272,5 +273,70 @@ describe("I18nModern", () => {
         values: { selected: 100, total: 100 },
       })
     ).toBe("Todas las 100 filas seleccionadas");
+  });
+
+  // Test new config-based API with plain object
+  it("i18n new API with plain object", () => {
+    const locales: ILocales = {};
+    const i18n = new I18nModern({
+      defaultLocale: "en-US",
+      locales,
+    });
+    i18n.loadFromValue(en, "en-US");
+    expect(i18n.get("home.greetings", { values })).toBe("Hello Uriel");
+    expect(i18n.get("profile.greetings", { values })).toBe("Hello Uriel");
+  });
+
+  // Test new config-based API with custom getter/setter (simulating Vue ref)
+  it("i18n new API with custom getter/setter (Vue-like)", () => {
+    // Simulate Vue ref
+    let localesValue: ILocales = {};
+    const localesRef = {
+      get value() {
+        return localesValue;
+      },
+      set value(newValue: ILocales) {
+        localesValue = newValue;
+      },
+    };
+
+    const i18n = new I18nModern({
+      defaultLocale: "en-US",
+      locales: {
+        get: () => localesRef.value,
+        set: (newLocales: ILocales) => {
+          localesRef.value = newLocales;
+        },
+      },
+    });
+
+    i18n.loadFromValue(en, "en-US");
+    expect(i18n.get("home.greetings", { values })).toBe("Hello Uriel");
+    expect(i18n.get("profile.greetings", { values })).toBe("Hello Uriel");
+
+    // Verify that the external ref was updated
+    expect(localesRef.value["en-US"]).toBeDefined();
+  });
+
+  // Test new config-based API with URL
+  it("i18n new API with URL", async () => {
+    const i18n = new I18nModern({
+      defaultLocale: "en-US",
+      locales: "http://localhost:3710/es.json",
+    });
+    await i18n.ready;
+    expect(i18n.get("home.greetings", { values })).toBe("Hola Uriel");
+  });
+
+  // Test backward compatibility with old API
+  it("i18n backward compatibility - old API still works", () => {
+    const i18n = new I18nModern("en-US", en);
+    expect(i18n.get("home.greetings", { values })).toBe("Hello Uriel");
+  });
+
+  it("i18n backward compatibility - old API with URL", async () => {
+    const i18n = new I18nModern("en-US", "http://localhost:3710/es.json");
+    await i18n.ready;
+    expect(i18n.get("home.greetings", { values })).toBe("Hola Uriel");
   });
 });

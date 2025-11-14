@@ -1,6 +1,22 @@
 import { evaluateExpression } from "./evaluator";
 
 /**
+ * function to check if running in development mode
+ * @returns {boolean}
+ */
+export function isDevelopmentMode(): boolean {
+  // Check for Vite dev mode
+  if (typeof import.meta !== "undefined" && import.meta.env) {
+    return import.meta.env.DEV === "true";
+  }
+  // Fallback to NODE_ENV
+  if (typeof process !== "undefined" && process.env) {
+    return process.env.NODE_ENV === "development";
+  }
+  return false;
+}
+
+/**
  * function to get value from deep object
  * @param {object} obj - object to get value from
  * @param {string} path - path to object
@@ -53,7 +69,7 @@ export function evalKey(key: string, values?: object): boolean {
     if (!isSafeString(formattedKey)) {
       return false;
     }
-    return evaluateExpression(formattedKey, values || {});
+    return evaluateExpression(formattedKey, values || {}, isDevelopmentMode());
   } else {
     if (values)
       return (

@@ -652,7 +652,8 @@ export function clearExpressionCache(): void {
  */
 export function evaluateExpression(
   expression: string,
-  context: Record<string, any> = {}
+  context: Record<string, any> = {},
+  isDev: boolean = false
 ): any {
   try {
     const normalizedExpression = expression.trim();
@@ -660,7 +661,9 @@ export function evaluateExpression(
     const evaluator = new Evaluator(context);
     return evaluator.evaluate(ast);
   } catch (error) {
-    console.error(`Failed to evaluate expression "${expression}":`, error);
+    if (isDev) {
+      console.error(`Failed to evaluate expression "${expression}":`, error);
+    }
     return false;
   }
 }
