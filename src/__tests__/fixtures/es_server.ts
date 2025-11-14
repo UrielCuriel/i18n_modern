@@ -42,6 +42,18 @@ const data = {
     true: "Tienes acceso premium",
     false: "Actualiza a premium",
   },
+  pagination: {
+    rowsPerPage: "Filas por página",
+    selected: {
+      "0": "Ninguna fila seleccionada",
+      "1": "1 fila seleccionada de [total]",
+      "[selected] === [total]": "Todas las [total] filas seleccionadas",
+      "[selected] > 1 && [selected] < [total]":
+        "[selected] de [total] filas seleccionadas",
+    },
+    page: "Página",
+    of: "de",
+  },
 };
 
 let server: ReturnType<typeof Bun.serve> | null = null;

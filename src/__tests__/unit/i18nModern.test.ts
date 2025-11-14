@@ -201,4 +201,76 @@ describe("I18nModern", () => {
       i18n.get("premium", { locale: "es-MX", values: { premium: false } })
     ).toBe("Actualiza a premium");
   });
+
+  it("i18n nested static keys with multiple variables", () => {
+    const i18n = new I18nModern("en-US");
+    i18n.loadFromValue(en, "en-US");
+
+    // Test nested static key "0"
+    expect(
+      i18n.get("pagination.selected", { values: { selected: 0, total: 100 } })
+    ).toBe("No rows selected");
+
+    // Test nested static key "1"
+    expect(
+      i18n.get("pagination.selected", { values: { selected: 1, total: 100 } })
+    ).toBe("1 row selected of 100");
+
+    // Test conditional: selected > 1 && selected < total
+    expect(
+      i18n.get("pagination.selected", { values: { selected: 5, total: 100 } })
+    ).toBe("5 of 100 rows selected");
+
+    expect(
+      i18n.get("pagination.selected", { values: { selected: 50, total: 100 } })
+    ).toBe("50 of 100 rows selected");
+
+    // Test conditional: selected === total
+    expect(
+      i18n.get("pagination.selected", { values: { selected: 100, total: 100 } })
+    ).toBe("All 100 rows selected");
+
+    expect(
+      i18n.get("pagination.selected", { values: { selected: 10, total: 10 } })
+    ).toBe("All 10 rows selected");
+  });
+
+  it("i18n nested static keys with multiple variables - Spanish locale", async () => {
+    const i18n = new I18nModern("en-US");
+    i18n.loadFromValue(en, "en-US");
+    i18n.loadFromUrl("http://localhost:3710/es.json", "es-MX");
+    await i18n.ready;
+
+    // Test nested static key "0" in Spanish
+    expect(
+      i18n.get("pagination.selected", {
+        locale: "es-MX",
+        values: { selected: 0, total: 100 },
+      })
+    ).toBe("Ninguna fila seleccionada");
+
+    // Test nested static key "1" in Spanish
+    expect(
+      i18n.get("pagination.selected", {
+        locale: "es-MX",
+        values: { selected: 1, total: 100 },
+      })
+    ).toBe("1 fila seleccionada de 100");
+
+    // Test conditional in Spanish
+    expect(
+      i18n.get("pagination.selected", {
+        locale: "es-MX",
+        values: { selected: 5, total: 100 },
+      })
+    ).toBe("5 de 100 filas seleccionadas");
+
+    // Test conditional: selected === total in Spanish
+    expect(
+      i18n.get("pagination.selected", {
+        locale: "es-MX",
+        values: { selected: 100, total: 100 },
+      })
+    ).toBe("Todas las 100 filas seleccionadas");
+  });
 });

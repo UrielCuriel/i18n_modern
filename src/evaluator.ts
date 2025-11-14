@@ -79,6 +79,7 @@ export interface BinaryOpNode extends ASTNode {
     | TokenType.GREATER_EQUAL
     | TokenType.LESS
     | TokenType.LESS_EQUAL;
+  operatorValue: string; // The actual operator string (==, ===, !=, !==, etc.)
   left: ASTNode;
   right: ASTNode;
 }
@@ -228,6 +229,19 @@ export class Tokenizer {
       }
 
       // Operators
+      // Check for === (strict equality)
+      if (this.current === "=" && this.peek() === "=" && this.peek(2) === "=") {
+        tokens.push({
+          type: TokenType.EQUAL,
+          value: "===",
+          position: this.position,
+        });
+        this.advance();
+        this.advance();
+        this.advance();
+        continue;
+      }
+      // Check for == (equality)
       if (this.current === "=" && this.peek() === "=") {
         tokens.push({
           type: TokenType.EQUAL,
@@ -244,6 +258,19 @@ export class Tokenizer {
           `Negation operator '!' is not supported at position ${this.position}. All evaluations must be explicit Boolean comparison expressions.`
         );
       }
+      // Check for !== (strict inequality)
+      if (this.current === "!" && this.peek() === "=" && this.peek(2) === "=") {
+        tokens.push({
+          type: TokenType.NOT_EQUAL,
+          value: "!==",
+          position: this.position,
+        });
+        this.advance();
+        this.advance();
+        this.advance();
+        continue;
+      }
+      // Check for != (inequality)
       if (this.current === "!" && this.peek() === "=") {
         tokens.push({
           type: TokenType.NOT_EQUAL,
@@ -416,11 +443,13 @@ export class Parser {
       token.type === TokenType.LESS_EQUAL
     ) {
       const operator = token.type;
+      const operatorValue = String(token.value);
       this.advance();
       const right = this.parsePrimary();
       return {
         type: NodeType.BINARY_OP,
         operator,
+        operatorValue,
         left,
         right,
       } as BinaryOpNode;
@@ -524,11 +553,24 @@ export class Evaluator {
   }
 
   /**
-   * Compare two values with type coercion
-   * Uses JavaScript's built-in type coercion (== and !=) to match the original eval() behavior.
-   * This allows expressions like [age] == "25" to work when age is the number 25.
+   * Compare two values with type coercion or strict equality
+   * Uses the operatorValue to determine if strict (===, !==) or loose (==, !=) comparison is needed
    */
-  private compare(left: any, right: any, operator: TokenType): boolean {
+  private compare(
+    left: any,
+    right: any,
+    operator: TokenType,
+    operatorValue: string
+  ): boolean {
+    // Use strict equality for === and !==
+    if (operatorValue === "===") {
+      return left === right;
+    }
+    if (operatorValue === "!==") {
+      return left !== right;
+    }
+
+    // Use loose equality with type coercion for == and !=
     switch (operator) {
       case TokenType.EQUAL:
         // Intentional use of == for type coercion to match original eval() behavior
@@ -573,7 +615,7 @@ export class Evaluator {
         const binOp = node as BinaryOpNode;
         const left = this.evaluate(binOp.left);
         const right = this.evaluate(binOp.right);
-        return this.compare(left, right, binOp.operator);
+        return this.compare(left, right, binOp.operator, binOp.operatorValue);
       }
 
       case NodeType.LOGICAL_OP: {

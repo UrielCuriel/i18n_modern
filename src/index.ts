@@ -155,23 +155,44 @@ export class I18nModern {
         : defaultTranslation;
 
     if (translation && typeof translation === "object") {
-      // First, try to find a static key match if we have a contextKey
-      // For example, if contextKey is "notificationsCount" and there's a key "0",
-      // we check if values.notificationsCount == 0
-      if (values && contextKey) {
-        const contextValue = values[contextKey];
-        if (contextValue !== undefined && contextValue !== null) {
-          const staticKey = String(contextValue);
-          if (
-            translation.hasOwnProperty(staticKey) &&
-            staticKey !== "default"
-          ) {
-            return this.getTranslation(
-              translation[staticKey],
-              values,
-              fallback,
-              undefined
-            );
+      // First, try to find a static key match
+      // Strategy 1: If we have a contextKey, try to match with values[contextKey]
+      // Strategy 2: Try to match with any value in the values object
+      if (values) {
+        // Strategy 1: Try contextKey first (for simple cases like notificationsCount)
+        if (contextKey) {
+          const contextValue = values[contextKey];
+          if (contextValue !== undefined && contextValue !== null) {
+            const staticKey = String(contextValue);
+            if (
+              translation.hasOwnProperty(staticKey) &&
+              staticKey !== "default"
+            ) {
+              return this.getTranslation(
+                translation[staticKey],
+                values,
+                fallback,
+                undefined
+              );
+            }
+          }
+        }
+
+        // Strategy 2: Try any value in values object (for nested cases like pagination.selected)
+        for (const [valueKey, value] of Object.entries(values)) {
+          if (value !== undefined && value !== null) {
+            const staticKey = String(value);
+            if (
+              translation.hasOwnProperty(staticKey) &&
+              staticKey !== "default"
+            ) {
+              return this.getTranslation(
+                translation[staticKey],
+                values,
+                fallback,
+                undefined
+              );
+            }
           }
         }
       }

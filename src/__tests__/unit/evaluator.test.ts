@@ -166,6 +166,8 @@ describe("Evaluator", () => {
       { expr: "[age] < 20", expected: false },
       { expr: "[age] == 25", expected: true },
       { expr: "[age] != 30", expected: true },
+      { expr: "[age] === 25", expected: true },
+      { expr: "[age] !== 30", expected: true },
     ];
 
     testCases.forEach(({ expr, expected }) => {
@@ -207,6 +209,24 @@ describe("Evaluator", () => {
   it("should short-circuit OR evaluation", () => {
     const evaluator = new Evaluator({ age: 25 });
     const tokenizer = new Tokenizer("[age] > 20 || [age] < 10");
+    const tokens = tokenizer.tokenize();
+    const parser = new Parser(tokens);
+    const ast = parser.parse();
+    expect(evaluator.evaluate(ast)).toBe(true);
+  });
+
+  it("should evaluate strict equality (===) between variables", () => {
+    const evaluator = new Evaluator({ selected: 100, total: 100 });
+    const tokenizer = new Tokenizer("[selected] === [total]");
+    const tokens = tokenizer.tokenize();
+    const parser = new Parser(tokens);
+    const ast = parser.parse();
+    expect(evaluator.evaluate(ast)).toBe(true);
+  });
+
+  it("should evaluate strict inequality (!==) between variables", () => {
+    const evaluator = new Evaluator({ selected: 50, total: 100 });
+    const tokenizer = new Tokenizer("[selected] !== [total]");
     const tokens = tokenizer.tokenize();
     const parser = new Parser(tokens);
     const ast = parser.parse();
@@ -269,5 +289,17 @@ describe("evaluateExpression", () => {
     expect(evaluateExpression("[age] < 25", values)).toBe(false);
     expect(evaluateExpression("[age] > 10 && [age] < 30", values)).toBe(true);
     expect(evaluateExpression("[age] > 10 || [age] < 30", values)).toBe(true);
+  });
+
+  it("should evaluate strict equality (===) between variables", () => {
+    const values = { selected: 100, total: 100 };
+    expect(evaluateExpression("[selected] === [total]", values)).toBe(true);
+    expect(evaluateExpression("[selected] === 100", values)).toBe(true);
+  });
+
+  it("should evaluate strict inequality (!==) between variables", () => {
+    const values = { selected: 50, total: 100 };
+    expect(evaluateExpression("[selected] !== [total]", values)).toBe(true);
+    expect(evaluateExpression("[selected] !== 100", values)).toBe(true);
   });
 });

@@ -33,7 +33,16 @@ export function getDeepValue(obj: any, path: string): any {
  * @returns {boolean}
  */
 export function evalKey(key: string, values?: object): boolean {
-  const logicalOperatorsJsList = ["==", "!=", ">", "<", ">=", "<="];
+  const logicalOperatorsJsList = [
+    "===",
+    "!==",
+    "==",
+    "!=",
+    ">=",
+    "<=",
+    ">",
+    "<",
+  ];
   const formattedKey = formatValue(key, values);
 
   //check if key include an operator
@@ -129,7 +138,7 @@ export function isSafeString(str: string): boolean {
     "script",
   ];
   const regexValidExpression =
-    /^(?:\[?(\d+|\w+)\]?)(?:(?:(?:\s?)(?:[\>\=\!\<\|\&]?){2}(?:\s?)(?:\[?(\d+|\w+)\]?)(?:[\>\=\!\<\|\&]?){2})*)?$/g;
+    /^(?:\[?(\d+|\w+)\]?)(?:(?:(?:\s?)(?:[\>\=\!\<\|\&]?){2,3}(?:\s?)(?:\[?(\d+|\w+)\]?)(?:[\>\=\!\<\|\&]?){2,3})*)?$/g;
   return (
     regexValidExpression.test(str) &&
     reservedWords.every((word) => !str.includes(word))

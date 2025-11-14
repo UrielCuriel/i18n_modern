@@ -39,4 +39,16 @@ export const en = {
     true: "You have premium access",
     false: "Upgrade to premium",
   },
+  pagination: {
+    rowsPerPage: "Rows per page",
+    selected: {
+      "0": "No rows selected",
+      "1": "1 row selected of [total]",
+      "[selected] === [total]": "All [total] rows selected",
+      "[selected] > 1 && [selected] < [total]":
+        "[selected] of [total] rows selected",
+    },
+    page: "Page",
+    of: "of",
+  },
 };
