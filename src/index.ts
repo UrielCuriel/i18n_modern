@@ -1,3 +1,4 @@
+declare const BUILD_VERSION: string;
 /**
  * Module to get translation from a locales variable
  * @author: Uriel Curiel <urielcuriel@outlook.com>
@@ -37,6 +38,11 @@ export class I18nModern {
     } else if (locales) {
       this.loadFromValue(locales, defaultLocale);
     }
+  }
+
+  //get version
+  static get version(): string {
+    return BUILD_VERSION;
   }
 
   // default locale getter
