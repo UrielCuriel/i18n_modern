@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/UrielCuriel/i18n_modern/compare/v2.0.1...v2.0.2) (2025-11-14)
+
+### Features
+
+- **evaluator:** enhance evaluator for strict equality checks ('===') ([3028363](https://github.com/UrielCuriel/i18n_modern/commit/3028363bd2e3f0539f219d5e5e9606fe101206e0))
+
 ### [2.0.1](https://github.com/UrielCuriel/i18n_modern/compare/v1.0.0...v2.0.1) (2025-11-14)
 
 ### Features
