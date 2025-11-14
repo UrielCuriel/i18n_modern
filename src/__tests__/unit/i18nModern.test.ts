@@ -61,4 +61,144 @@ describe("I18nModern", () => {
       })
     ).toBe("you are too young to vote");
   });
+
+  it("i18n static keys combined with conditionals - notificationsCount", () => {
+    const i18n = new I18nModern("en-US");
+    i18n.loadFromValue(en, "en-US");
+
+    // Test static key "0"
+    expect(
+      i18n.get("notificationsCount", { values: { notificationsCount: 0 } })
+    ).toBe("You have no notifications");
+
+    // Test static key "1"
+    expect(
+      i18n.get("notificationsCount", { values: { notificationsCount: 1 } })
+    ).toBe("You have one notification");
+
+    // Test conditional range [2-10]
+    expect(
+      i18n.get("notificationsCount", { values: { notificationsCount: 2 } })
+    ).toBe("You have 2 notifications");
+
+    expect(
+      i18n.get("notificationsCount", { values: { notificationsCount: 5 } })
+    ).toBe("You have 5 notifications");
+
+    expect(
+      i18n.get("notificationsCount", { values: { notificationsCount: 10 } })
+    ).toBe("You have 10 notifications");
+
+    // Test conditional > 10
+    expect(
+      i18n.get("notificationsCount", { values: { notificationsCount: 11 } })
+    ).toBe("You have many notifications");
+
+    expect(
+      i18n.get("notificationsCount", { values: { notificationsCount: 100 } })
+    ).toBe("You have many notifications");
+  });
+
+  it("i18n static keys combined with conditionals - Spanish locale", async () => {
+    const i18n = new I18nModern("en-US");
+    i18n.loadFromValue(en, "en-US");
+    i18n.loadFromUrl("http://localhost:3710/es.json", "es-MX");
+    await i18n.ready;
+
+    // Test static key "0" in Spanish
+    expect(
+      i18n.get("notificationsCount", {
+        locale: "es-MX",
+        values: { notificationsCount: 0 },
+      })
+    ).toBe("No tienes notificaciones");
+
+    // Test static key "1" in Spanish
+    expect(
+      i18n.get("notificationsCount", {
+        locale: "es-MX",
+        values: { notificationsCount: 1 },
+      })
+    ).toBe("Tienes una notificación");
+
+    // Test conditional range [2-10] in Spanish
+    expect(
+      i18n.get("notificationsCount", {
+        locale: "es-MX",
+        values: { notificationsCount: 3 },
+      })
+    ).toBe("Tienes 3 notificaciones");
+
+    expect(
+      i18n.get("notificationsCount", {
+        locale: "es-MX",
+        values: { notificationsCount: 7 },
+      })
+    ).toBe("Tienes 7 notificaciones");
+
+    // Test conditional > 10 in Spanish
+    expect(
+      i18n.get("notificationsCount", {
+        locale: "es-MX",
+        values: { notificationsCount: 15 },
+      })
+    ).toBe("Tienes muchas notificaciones");
+  });
+
+  it("i18n static string keys", () => {
+    const i18n = new I18nModern("en-US");
+    i18n.loadFromValue(en, "en-US");
+
+    // Test static string keys
+    expect(i18n.get("status", { values: { status: "active" } })).toBe(
+      "Your account is active"
+    );
+
+    expect(i18n.get("status", { values: { status: "inactive" } })).toBe(
+      "Your account is inactive"
+    );
+
+    expect(i18n.get("status", { values: { status: "pending" } })).toBe(
+      "Your account is pending approval"
+    );
+  });
+
+  it("i18n static boolean keys", () => {
+    const i18n = new I18nModern("en-US");
+    i18n.loadFromValue(en, "en-US");
+
+    // Test static boolean keys
+    expect(i18n.get("premium", { values: { premium: true } })).toBe(
+      "You have premium access"
+    );
+
+    expect(i18n.get("premium", { values: { premium: false } })).toBe(
+      "Upgrade to premium"
+    );
+  });
+
+  it("i18n static keys with Spanish locale", async () => {
+    const i18n = new I18nModern("en-US");
+    i18n.loadFromValue(en, "en-US");
+    i18n.loadFromUrl("http://localhost:3710/es.json", "es-MX");
+    await i18n.ready;
+
+    // Test static string keys in Spanish
+    expect(
+      i18n.get("status", { locale: "es-MX", values: { status: "active" } })
+    ).toBe("Tu cuenta está activa");
+
+    expect(
+      i18n.get("status", { locale: "es-MX", values: { status: "inactive" } })
+    ).toBe("Tu cuenta está inactiva");
+
+    // Test static boolean keys in Spanish
+    expect(
+      i18n.get("premium", { locale: "es-MX", values: { premium: true } })
+    ).toBe("Tienes acceso premium");
+
+    expect(
+      i18n.get("premium", { locale: "es-MX", values: { premium: false } })
+    ).toBe("Actualiza a premium");
+  });
 });

@@ -23,4 +23,20 @@ export const en = {
       "[age] < 18": "you are too young to vote",
     },
   },
+  notificationsCount: {
+    "0": "You have no notifications",
+    "1": "You have one notification",
+    "[notificationsCount] >= 2 && [notificationsCount] <= 10":
+      "You have [notificationsCount] notifications",
+    "[notificationsCount] > 10": "You have many notifications",
+  },
+  status: {
+    active: "Your account is active",
+    inactive: "Your account is inactive",
+    pending: "Your account is pending approval",
+  },
+  premium: {
+    true: "You have premium access",
+    false: "Upgrade to premium",
+  },
 };

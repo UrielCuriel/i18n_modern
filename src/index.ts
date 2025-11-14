@@ -112,7 +112,15 @@ export class I18nModern {
     }
 
     const translation = getDeepValue(localeData, key);
-    const resolved = this.getTranslation(translation, values);
+    // Extract the last part of the key path to use as context for static key matching
+    const keyParts = key.split(".");
+    const contextKey = keyParts[keyParts.length - 1];
+    const resolved = this.getTranslation(
+      translation,
+      values,
+      undefined,
+      contextKey
+    );
 
     if (typeof resolved === "string") {
       this.setCache(cacheKey, resolved);
@@ -127,12 +135,15 @@ export class I18nModern {
    * function to get a translation from object and formant there
    * @param { Object} translation
    * @param {IFormatParam} params
+   * @param {string} defaultTranslation
+   * @param {string} contextKey - The key name to use for static value matching
    * @returns {string}
    */
   getTranslation(
     translation: any,
     values?: IFormatParam,
-    defaultTranslation?: string
+    defaultTranslation?: string,
+    contextKey?: string
   ): string | undefined {
     if (typeof translation === "string") {
       return formatValue(translation, values);
@@ -144,17 +155,44 @@ export class I18nModern {
         : defaultTranslation;
 
     if (translation && typeof translation === "object") {
+      // First, try to find a static key match if we have a contextKey
+      // For example, if contextKey is "notificationsCount" and there's a key "0",
+      // we check if values.notificationsCount == 0
+      if (values && contextKey) {
+        const contextValue = values[contextKey];
+        if (contextValue !== undefined && contextValue !== null) {
+          const staticKey = String(contextValue);
+          if (
+            translation.hasOwnProperty(staticKey) &&
+            staticKey !== "default"
+          ) {
+            return this.getTranslation(
+              translation[staticKey],
+              values,
+              fallback,
+              undefined
+            );
+          }
+        }
+      }
+
+      // Then, try conditional keys
       const key = Object.keys(translation).find(
         (candidate) => candidate !== "default" && evalKey(candidate, values)
       );
 
       if (key) {
-        return this.getTranslation(translation[key], values, fallback);
+        return this.getTranslation(
+          translation[key],
+          values,
+          fallback,
+          undefined
+        );
       }
     }
 
     if (typeof fallback === "string") {
-      return this.getTranslation(fallback, values, fallback);
+      return this.getTranslation(fallback, values, fallback, undefined);
     }
 
     return undefined;

@@ -26,6 +26,22 @@ const data = {
       "[age] >= 18": "Eres lo suficientemente viejo para votar",
     },
   },
+  notificationsCount: {
+    "0": "No tienes notificaciones",
+    "1": "Tienes una notificación",
+    "[notificationsCount] >= 2 && [notificationsCount] <= 10":
+      "Tienes [notificationsCount] notificaciones",
+    "[notificationsCount] > 10": "Tienes muchas notificaciones",
+  },
+  status: {
+    active: "Tu cuenta está activa",
+    inactive: "Tu cuenta está inactiva",
+    pending: "Tu cuenta está pendiente de aprobación",
+  },
+  premium: {
+    true: "Tienes acceso premium",
+    false: "Actualiza a premium",
+  },
 };
 
 let server: ReturnType<typeof Bun.serve> | null = null;
